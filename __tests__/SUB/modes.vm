@@ -1,0 +1,3 @@
+SUB #0010
+SUB $0FFF
+HLT

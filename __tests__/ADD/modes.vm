@@ -1,0 +1,3 @@
+ADD #0005
+ADD $FFFD
+HLT
