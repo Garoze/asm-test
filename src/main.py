@@ -4,6 +4,7 @@
 # https://github.com/garyexplains/examples/blob/master/vASM.py
 
 import re
+from os import path
 from sys import argv
 from enum import IntFlag, auto
 
@@ -53,28 +54,34 @@ class Instructions(IntFlag):
 class Mode(IntFlag):
     IMP = auto()
     IMM = auto()
+    ABS = auto()
 
 def usage(program):
     print(f"usage: {program} <file_path>")
     exit(1)
 
 def write_out(b):
-    print(bytearray(b))
-    #  with open("out.bin", "ab") as out:
-    #      out.write(bytearray(b))
+    with open("out.bin", "ab") as out:
+        out.write(bytearray(b))
 
-def make_instruction(instruction, value, mode):
+def make_instruction(instruction, mode, value = 0x00):
     match mode:
         case Mode.IMP:
-            add16 = int(f'0x{value[1:]}', 16)
-            b = [instruction, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
+            b  = [instruction]
             return b
         case Mode.IMM:
             imm16 = int(f'0x{value[1:]}', 16)
             b = [instruction, (imm16 & 0x00FF), (imm16 & 0xFF00) >> 8]
             return b
+        case Mode.ABS:
+            add16 = int(f'0x{value[1:]}', 16)
+            b = [instruction, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
+            return b
 
 def main():
+    with open('out.bin', "wb") as out:
+        out.close()
+
     with open(argv[1]) as f:
         for line in f:
             if line[0] in ';.':
@@ -85,69 +92,70 @@ def main():
 
             match token[0].upper():
                 case "NOP":
-                    pass
+                    b = make_instruction(Instructions.NOP, Mode.IMP)
+                    write_out(b)
                 case "LDA":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            b = make_instruction(Instructions.LDI, value, Mode.IMM)
+                            b = make_instruction(Instructions.LDI, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.LDA, value, Mode.IMP)
+                            b = make_instruction(Instructions.LDA, Mode.IMP, value)
                             write_out(b)
                 case "STA":
                     value = token[1]
                     match value[0]:
                         case "$":
-                            b = make_instruction(Instructions.STA, value, Mode.IMP)
+                            b = make_instruction(Instructions.STA, Mode.IMP, value)
                             write_out(b)
                 case "ADD":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            b = make_instruction(Instructions.ADD, value, Mode.IMM)
+                            b = make_instruction(Instructions.ADD, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.ADA, value, Mode.IMP)
+                            b = make_instruction(Instructions.ADA, Mode.IMP, value)
                             write_out(b)
                 case "SUB":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            b = make_instruction(Instructions.SUB, value, Mode.IMM)
+                            b = make_instruction(Instructions.SUB, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.SUA, value, Mode.IMP)
+                            b = make_instruction(Instructions.SUA, Mode.IMP, value)
                             write_out(b)
                 case "MUL":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            b = make_instruction(Instructions.MUL, value, Mode.IMM)
+                            b = make_instruction(Instructions.MUL, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.MUA, value, Mode.IMP)
+                            b = make_instruction(Instructions.MUA, Mode.IMP, value)
                             write_out(b)
                 case "DIV":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            b = make_instruction(Instructions.DIV, value, Mode.IMM)
+                            b = make_instruction(Instructions.DIV, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.DIA, value, Mode.IMP)
+                            b = make_instruction(Instructions.DIA, Mode.IMP, value)
                             write_out(b)
                 case "MOD":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            b = make_instruction(Instructions.MOD, value, Mode.IMM)
+                            b = make_instruction(Instructions.MOD, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.MOA, value, Mode.IMP)
+                            b = make_instruction(Instructions.MOA, Mode.IMP, value)
                             write_out(b)
                 case "HLT":
-                    b  = [Instructions.HLT]
+                    b = make_instruction(Instructions.HLT, Mode.IMP)
                     write_out(b)
                     pass
 
