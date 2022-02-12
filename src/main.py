@@ -50,6 +50,10 @@ class Instructions(IntFlag):
     #  OUT = auto()
     HLT = 0x28
 
+class Mode(IntFlag):
+    IMP = auto()
+    IMM = auto()
+
 def usage(program):
     print(f"usage: {program} <file_path>")
     exit(1)
@@ -58,6 +62,17 @@ def write_out(b):
     print(bytearray(b))
     #  with open("out.bin", "ab") as out:
     #      out.write(bytearray(b))
+
+def make_instruction(instruction, value, mode):
+    match mode:
+        case Mode.IMP:
+            add16 = int(f'0x{value[1:]}', 16)
+            b = [instruction, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
+            return b
+        case Mode.IMM:
+            imm16 = int(f'0x{value[1:]}', 16)
+            b = [instruction, (imm16 & 0x00FF), (imm16 & 0xFF00) >> 8]
+            return b
 
 def main():
     with open(argv[1]) as f:
@@ -75,80 +90,66 @@ def main():
                     value = token[1]
                     match value[0]:
                         case "#":
-                            imm16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.LDI, (imm16 & 0x00FF), (imm16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.LDI, value, Mode.IMM)
                             write_out(b)
                         case "$":
-                            add16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.LDA, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.LDA, value, Mode.IMP)
                             write_out(b)
                 case "STA":
                     value = token[1]
                     match value[0]:
                         case "$":
-                            add16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.STA, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.STA, value, Mode.IMP)
                             write_out(b)
                 case "ADD":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            imm16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.ADD, (imm16 & 0x00FF), (imm16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.ADD, value, Mode.IMM)
                             write_out(b)
                         case "$":
-                            add16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.ADA, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.ADA, value, Mode.IMP)
                             write_out(b)
                 case "SUB":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            imm16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.SUB, (imm16 & 0x00FF), (imm16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.SUB, value, Mode.IMM)
                             write_out(b)
                         case "$":
-                            add16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.SUA, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.SUA, value, Mode.IMP)
                             write_out(b)
                 case "MUL":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            imm16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.MUL, (imm16 & 0x00FF), (imm16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.MUL, value, Mode.IMM)
                             write_out(b)
                         case "$":
-                            add16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.MUA, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.MUA, value, Mode.IMP)
                             write_out(b)
                 case "DIV":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            imm16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.DIV, (imm16 & 0x00FF), (imm16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.DIV, value, Mode.IMM)
                             write_out(b)
                         case "$":
-                            add16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.DIA, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.DIA, value, Mode.IMP)
                             write_out(b)
                 case "MOD":
                     value = token[1]
                     match value[0]:
                         case "#":
-                            imm16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.MOD, (imm16 & 0x00FF), (imm16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.MOD, value, Mode.IMM)
                             write_out(b)
                         case "$":
-                            add16 = int(f'0x{value[1:]}', 16)
-                            b = [Instructions.MOA, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
+                            b = make_instruction(Instructions.MOA, value, Mode.IMP)
                             write_out(b)
                 case "HLT":
                     b  = [Instructions.HLT]
                     write_out(b)
                     pass
-
 
 if __name__ == '__main__':
     if len(argv) < 2:
