@@ -1,0 +1,4 @@
+NOP
+LDA #ABCD
+LDA $FFFD
+HLT
