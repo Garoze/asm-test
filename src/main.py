@@ -101,13 +101,13 @@ def main():
                             b = make_instruction(Instructions.LDI, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.LDA, Mode.IMP, value)
+                            b = make_instruction(Instructions.LDA, Mode.ABS, value)
                             write_out(b)
                 case "STA":
                     value = token[1]
                     match value[0]:
                         case "$":
-                            b = make_instruction(Instructions.STA, Mode.IMP, value)
+                            b = make_instruction(Instructions.STA, Mode.ABS, value)
                             write_out(b)
                 case "ADD":
                     value = token[1]
@@ -116,7 +116,7 @@ def main():
                             b = make_instruction(Instructions.ADD, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.ADA, Mode.IMP, value)
+                            b = make_instruction(Instructions.ADA, Mode.ABS, value)
                             write_out(b)
                 case "SUB":
                     value = token[1]
@@ -125,7 +125,7 @@ def main():
                             b = make_instruction(Instructions.SUB, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.SUA, Mode.IMP, value)
+                            b = make_instruction(Instructions.SUA, Mode.ABS, value)
                             write_out(b)
                 case "MUL":
                     value = token[1]
@@ -134,7 +134,7 @@ def main():
                             b = make_instruction(Instructions.MUL, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.MUA, Mode.IMP, value)
+                            b = make_instruction(Instructions.MUA, Mode.ABS, value)
                             write_out(b)
                 case "DIV":
                     value = token[1]
@@ -143,7 +143,7 @@ def main():
                             b = make_instruction(Instructions.DIV, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.DIA, Mode.IMP, value)
+                            b = make_instruction(Instructions.DIA, Mode.ABS, value)
                             write_out(b)
                 case "MOD":
                     value = token[1]
@@ -152,7 +152,7 @@ def main():
                             b = make_instruction(Instructions.MOD, Mode.IMM, value)
                             write_out(b)
                         case "$":
-                            b = make_instruction(Instructions.MOA, Mode.IMP, value)
+                            b = make_instruction(Instructions.MOA, Mode.ABS, value)
                             write_out(b)
                 case "HLT":
                     b = make_instruction(Instructions.HLT, Mode.IMP)
