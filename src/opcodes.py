@@ -6,7 +6,6 @@ class Modes(IntFlag):
     ABS = auto()
 
 class Address(IntFlag):
-    IMP = auto()
     IM8 = auto()
     I16 = auto()
 
