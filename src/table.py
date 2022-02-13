@@ -11,7 +11,9 @@ Opcode_t = {
     },
     "STA": {
         "$": (Instructions.STA, Modes.ABS, Address.I16),
-        "_": (Instructions.STS, Modes.IMP),
+    },
+    "STS": {
+        "$": (Instructions.STS, Modes.ABS, Address.I16),
     },
     "ADD": {
         "#": (Instructions.ADD, Modes.IMM, Address.I16),
