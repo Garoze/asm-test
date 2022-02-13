@@ -4,79 +4,54 @@
 # https://github.com/garyexplains/examples/blob/master/vASM.py
 
 import re
-from os import path
 from sys import argv
-from enum import IntFlag, auto
 
-class Instructions(IntFlag):
-    NOP = 0x00
-    LDI = 0x01
-    LDA = 0x02
-    #  LDS = auto()
-    STA = 0x04
-    #  STS = auto()
-    ADD = 0x06
-    ADA = 0x07
-    #  ADS = auto()
-    SUB = 0x09
-    SUA = 0x0A
-    #  SUS = auto()
-    MUL = 0x0C
-    MUA = 0x0D
-    #  MUS = auto()
-    DIV = 0x0F
-    DIA = 0x10
-    #  DIS = auto()
-    MOD = 0x03
-    MOA = 0x04
-    #  MOS = auto()
-    #  INC = auto()
-    #  DEC = auto()
-    #  SHL = auto()
-    #  SHR = auto()
-    #  AND = auto()
-    #  BOR = auto()
-    #  XOR = auto()
-    #  NOT = auto()
-    #  PSH = auto()
-    #  POP = auto()
-    #  CMP = auto()
-    #  CMA = auto()
-    #  CMS = auto()
-    #  JMP = auto()
-    #  JMZ = auto()
-    #  JNZ = auto()
-    #  CAL = auto()
-    #  RET = auto()
-    #  OUT = auto()
-    HLT = 0x28
-
-class Mode(IntFlag):
-    IMP = auto()
-    IMM = auto()
-    ABS = auto()
-
-def usage(program):
-    print(f"usage: {program} <file_path>")
-    exit(1)
+from table import Opcode_t
+from opcodes import Instructions, Modes, Address
 
 def write_out(b):
     with open("out.bin", "ab") as out:
         out.write(bytearray(b))
 
-def make_instruction(instruction, mode, value = 0x00):
-    match mode:
-        case Mode.IMP:
-            b  = [instruction]
-            return b
-        case Mode.IMM:
-            imm16 = int(f'0x{value[1:]}', 16)
-            b = [instruction, (imm16 & 0x00FF), (imm16 & 0xFF00) >> 8]
-            return b
-        case Mode.ABS:
-            add16 = int(f'0x{value[1:]}', 16)
-            b = [instruction, (add16 & 0x00FF), (add16 & 0xFF00) >> 8]
-            return b
+def get_mode(value: str) -> Modes:
+    """
+    Return the right mode from a value
+    example: LDI #FFFF -> IMM mode I16
+    """
+    match value:
+        case "#": return Modes.IMM
+        case "$": return Modes.ABS
+        case   _: return Modes.IMP
+
+def LSB(value: str) -> int:
+    """
+    Return the LSB of a value
+    example: ABCD -> CD
+    """
+    return int(f'0x{value[1:]}', 16) & 0x00FF
+
+def MSB(value):
+    """
+    Return the MSB of a value
+    example: ABCD -> AB
+    """
+    return (int(f'0x{value[1:]}', 16) & 0xFF00) >> 8
+
+def make_instruction(instruction: tuple, value: str = ""):
+    """
+    Generate the byte for a instruction
+    """
+    match instruction[1]:
+        case Modes.IMP:
+            return [instruction[0]]
+        case Modes.IMM:
+            match instruction[2]:
+                case Address.IM8:
+                    return [instruction[0], LSB(value)]
+                case Address.I16:
+                    return [instruction[0], LSB(value), MSB(value)]
+        case Modes.ABS:
+            return [instruction[0], LSB(value), MSB(value)]
 
 def main():
     with open('out.bin', "wb") as out:
@@ -87,81 +62,27 @@ def main():
             if line[0] in ';.':
                 continue
 
-            line = line.replace('\n', '').replace('\r', '')
+            line  = line.replace('\n', '').replace('\r', '')
             token = re.split(r'[, ]', line)
 
-            match token[0].upper():
-                case "NOP":
-                    b = make_instruction(Instructions.NOP, Mode.IMP)
-                    write_out(b)
-                case "LDA":
+            instruction = Opcode_t[token[0].upper()]
+
+            match instruction[1]:
+                case Modes.IMP:
+                    b = make_instruction(instruction)
+                    print(b)
+                case Modes.IMM:
                     value = token[1]
-                    match value[0]:
-                        case "#":
-                            b = make_instruction(Instructions.LDI, Mode.IMM, value)
-                            write_out(b)
-                        case "$":
-                            b = make_instruction(Instructions.LDA, Mode.ABS, value)
-                            write_out(b)
-                case "STA":
+                    b = make_instruction(instruction, value)
+                    print(b)
+                case Modes.ABS:
                     value = token[1]
-                    match value[0]:
-                        case "$":
-                            b = make_instruction(Instructions.STA, Mode.ABS, value)
-                            write_out(b)
-                case "ADD":
-                    value = token[1]
-                    match value[0]:
-                        case "#":
-                            b = make_instruction(Instructions.ADD, Mode.IMM, value)
-                            write_out(b)
-                        case "$":
-                            b = make_instruction(Instructions.ADA, Mode.ABS, value)
-                            write_out(b)
-                case "SUB":
-                    value = token[1]
-                    match value[0]:
-                        case "#":
-                            b = make_instruction(Instructions.SUB, Mode.IMM, value)
-                            write_out(b)
-                        case "$":
-                            b = make_instruction(Instructions.SUA, Mode.ABS, value)
-                            write_out(b)
-                case "MUL":
-                    value = token[1]
-                    match value[0]:
-                        case "#":
-                            b = make_instruction(Instructions.MUL, Mode.IMM, value)
-                            write_out(b)
-                        case "$":
-                            b = make_instruction(Instructions.MUA, Mode.ABS, value)
-                            write_out(b)
-                case "DIV":
-                    value = token[1]
-                    match value[0]:
-                        case "#":
-                            b = make_instruction(Instructions.DIV, Mode.IMM, value)
-                            write_out(b)
-                        case "$":
-                            b = make_instruction(Instructions.DIA, Mode.ABS, value)
-                            write_out(b)
-                case "MOD":
-                    value = token[1]
-                    match value[0]:
-                        case "#":
-                            b = make_instruction(Instructions.MOD, Mode.IMM, value)
-                            write_out(b)
-                        case "$":
-                            b = make_instruction(Instructions.MOA, Mode.ABS, value)
-                            write_out(b)
-                case "HLT":
-                    b = make_instruction(Instructions.HLT, Mode.IMP)
-                    write_out(b)
-                    pass
+                    b = make_instruction(instruction, value)
+                    print(b)
 
 if __name__ == '__main__':
     if len(argv) < 2:
-        usage(argv[0])
+        print(f"usage: {argv[0]} <file_path>")
+        exit(1)
     else:
         main()
-
