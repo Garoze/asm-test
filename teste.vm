@@ -3,5 +3,3 @@ LDA $FFFD
 STA $0010
 OUT
 HLT
-
-
