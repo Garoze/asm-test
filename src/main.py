@@ -63,8 +63,8 @@ def make_instruction(instruction: tuple, value: str = ""):
         case Modes.ABS:
             return [instruction[0], LSB(value), MSB(value)]
 
-def valid_mnemonic(mnemonic: str) -> bool:
-    return mnemonic in Opcode_t
+def valid_opcode(opcode: str) -> bool:
+    return opcode in Opcode_t
 
 def main():
     with open('out.bin', "wb") as out:
@@ -80,7 +80,7 @@ def main():
 
             opcode = token[0].upper()
 
-            if (valid_mnemonic(opcode)):
+            if (valid_opcode(opcode)):
                 match len(token):
                     case 1:
                         instruction = get_instruction(opcode, Modes.IMP)
