@@ -9,19 +9,29 @@ from sys import argv
 from table import Opcode_t
 from opcodes import Instructions, Modes, Address
 
-def write_out(b):
-    with open("out.bin", "ab") as out:
-        out.write(bytearray(b))
+def get_instruction(instruction: str, mode: Modes = Modes.IMP):
+    match mode:
+        case Modes.IMM:
+            return Opcode_t[instruction]["#"]
+        case Modes.ABS:
+            return Opcode_t[instruction]["$"]
+        case Modes.IMP:
+            return Opcode_t[instruction]["_"]
 
-def get_mode(value: str) -> Modes:
+def get_mode(value: str = "") -> Modes:
     """
     Return the right mode from a value
     example: LDI #FFFF -> IMM mode I16
     """
-    match value:
+    v = value[0]
+    match v:
         case "#": return Modes.IMM
         case "$": return Modes.ABS
         case   _: return Modes.IMP
+
+def write_out(b):
+    with open("out.bin", "ab") as out:
+        out.write(bytearray(b))
 
 def LSB(value: str) -> int:
     """
@@ -53,6 +63,9 @@ def make_instruction(instruction: tuple, value: str = ""):
         case Modes.ABS:
             return [instruction[0], LSB(value), MSB(value)]
 
+def valid_mnemonic(mnemonic: str) -> bool:
+    return mnemonic in Opcode_t
+
 def main():
     with open('out.bin', "wb") as out:
         out.close()
@@ -65,20 +78,20 @@ def main():
             line  = line.replace('\n', '').replace('\r', '')
             token = re.split(r'[, ]', line)
 
-            instruction = Opcode_t[token[0].upper()]
+            opcode = token[0].upper()
 
-            match instruction[1]:
-                case Modes.IMP:
-                    b = make_instruction(instruction)
-                    print(b)
-                case Modes.IMM:
-                    value = token[1]
-                    b = make_instruction(instruction, value)
-                    print(b)
-                case Modes.ABS:
-                    value = token[1]
-                    b = make_instruction(instruction, value)
-                    print(b)
+            if (valid_mnemonic(opcode)):
+                match len(token):
+                    case 1:
+                        instruction = get_instruction(opcode, Modes.IMP)
+                        b = make_instruction(instruction)
+                        write_out(b)
+                    case 2:
+                        value = token[1]
+                        mode  = get_mode(value)
+                        instruction = get_instruction(opcode, mode)
+                        b = make_instruction(instruction, value)
+                        write_out(b)
 
 if __name__ == '__main__':
     if len(argv) < 2:
@@ -86,3 +99,4 @@ if __name__ == '__main__':
         exit(1)
     else:
         main()
+
