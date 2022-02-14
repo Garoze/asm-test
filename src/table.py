@@ -77,15 +77,19 @@ Opcode_t = {
     },
     "JMP": {
         "$": (Instructions.JMP, Modes.ABS, Address.I16),
+        "L": (Instructions.JMP, Modes.LBE, Address.I16),
     },
     "JMZ": {
         "$": (Instructions.JMZ, Modes.ABS, Address.I16),
+        "L": (Instructions.JMP, Modes.LBE, Address.I16),
     },
     "JNZ": {
         "$": (Instructions.JNZ, Modes.ABS, Address.I16),
+        "L": (Instructions.JNZ, Modes.LBE, Address.I16),
     },
     "CAL": {
         "$": (Instructions.CAL, Modes.ABS, Address.I16),
+        "L": (Instructions.CAL, Modes.LBE, Address.I16),
     },
     "RET": {
         "_": (Instructions.RET, Modes.IMP),

@@ -4,6 +4,7 @@ class Modes(IntFlag):
     IMP = auto()
     IMM = auto()
     ABS = auto()
+    LBE = auto()
 
 class Address(IntFlag):
     IM8 = auto()

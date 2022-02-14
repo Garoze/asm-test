@@ -1,8 +1,10 @@
-.start:
+.start
     PSH #05
     LDA
+.loop
     SUB #01
-    JNZ start
-.start:
     OUT
+    JNZ loop
+    JMP end
+.end
     HLT
