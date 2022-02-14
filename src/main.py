@@ -4,8 +4,8 @@
 # https://github.com/garyexplains/examples/blob/master/vASM.py
 
 import re
+import codecs
 from sys import argv
-
 from table import Opcode_t
 from opcodes import Instructions, Modes, Address
 
@@ -37,14 +37,16 @@ def LSB(value: str) -> int:
     Return the LSB of a value
     example: ABCD -> CD
     """
-    return int(f'0x{value[1:]}', 16) & 0x00FF
+    LSB = (int(value[1:], 16) & 0x00FF)
+    return LSB
 
 def MSB(value):
     """
     Return the MSB of a value
     example: ABCD -> AB
     """
-    return (int(f'0x{value[1:]}', 16) & 0xFF00) >> 8
+    MSB = (int(value[1:], 16) & 0xFF00) >> 8
+    return MSB
 
 def as_hex(value):
     return "0x{:04X}".format(value)
@@ -70,7 +72,7 @@ def make_instruction(instruction: tuple, value: str = ""):
             return 3
         case Modes.LBE:
             write_buffer([instruction[0], value])
-            return 2
+            return 3
 
     return 0
 
@@ -118,8 +120,16 @@ def resolve_labels(b):
 
     return buffer
 
+def inc_pc(pc, n):
+    """
+    Increment the PC by n amount
+    and keep the Hex format
+    """
+    inc = int(pc, 16) + n
+    return hex(inc)
+
 def main():
-    PC = 0x0000
+    PC = hex(0)
 
     with open('out.bin', "wb") as out:
         out.close()
@@ -142,18 +152,21 @@ def main():
                     match len(token):
                         case 1:
                             instruction = get_instruction(opcode, Modes.IMP)
-                            PC += make_instruction(instruction)
+                            n = make_instruction(instruction)
+                            PC = inc_pc(PC, n)
                         case 2:
                             if token[1][0] in '#$':
                                 value = token[1]
                                 mode = get_mode(value)
                                 instruction = get_instruction(opcode, mode)
-                                PC += make_instruction(instruction, value)
+                                n = make_instruction(instruction, value)
+                                PC = inc_pc(PC, n)
                             else:
                                 value = f'L{token[1]}'
                                 mode = get_mode(value)
                                 instruction = get_instruction(opcode, mode)
-                                PC += make_instruction(instruction, value)
+                                n = make_instruction(instruction, value)
+                                PC = inc_pc(PC, n)
                         case _:
                             print(f"Something went wrong PC: {PC}")
                 else:
