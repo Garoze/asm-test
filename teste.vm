@@ -1,5 +1,8 @@
-PSH #ABCD
-LDA $FFFD
-STA $10
-OUT
-HLT
+.start:
+    PSH #05
+    LDA
+    SUB #01
+    JNZ start
+.start:
+    OUT
+    HLT
