@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# Reference:
-# https://github.com/garyexplains/examples/blob/master/vASM.py
-
 import re
 import codecs
 from sys import argv
